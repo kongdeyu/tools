@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <curl/curl.h>
 

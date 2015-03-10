@@ -13,7 +13,7 @@ HttpRequest::HttpRequest() : _curl(NULL)
         _s_has_init = true;
     }
     _linger.l_onoff = 1;
-    _inger.l_linger = 0;
+    _linger.l_linger = 0;
     _resp.reset();
     _error[0] = 0;
 }
@@ -59,7 +59,7 @@ bool HttpRequest::request(const std::string &url,
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void *)(&_resp))
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, write_callback)
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTDATA, (void *)(&_linger))
-            || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTFUNCTION, socket_callback))
+            || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback))
     {
         return false;
     }
@@ -77,7 +77,7 @@ bool HttpRequest::request(const std::string &url,
             return false;
         }
     }
-    if(HTTP_POST == method)
+    else if(HTTP_POST == method)
     {
         if(CURLE_OK != curl_easy_setopt(_curl, CURLOPT_POST, 1)
                 || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, data.c_str()))
@@ -87,7 +87,7 @@ bool HttpRequest::request(const std::string &url,
     }
     else  // invalid request type
     {
-        return false
+        return false;
     }
 
     long retcode;
@@ -127,7 +127,7 @@ size_t HttpRequest::write_callback(char *ptr,
     return bytes_n;
 }
 
-int32_t HttpRequest::socket_callback(void *clientp,
+int32_t HttpRequest::sockopt_callback(void *clientp,
         curl_socket_t curlfd,
         curlsocktype)
 {
