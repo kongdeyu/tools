@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <cstring>
 #include <string>
 #include <curl/curl.h>
 
@@ -49,9 +48,9 @@ private:
             curlsocktype purpose);
 
     static bool _s_has_init;  // make sure curl_global_init() is only called once
-    linger _linger;
     CURL *_curl;
     HttpWriteData _resp;
+    linger _linger;
     char _error[CURL_ERROR_SIZE];
 };
 }

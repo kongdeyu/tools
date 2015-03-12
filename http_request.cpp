@@ -1,4 +1,6 @@
  
+#include <cstring>
+#include <iostream>
 #include "http_request.h"
 
 namespace tool
@@ -47,6 +49,7 @@ bool HttpRequest::request(const std::string &url,
     _curl = curl_easy_init();
     if(NULL == _curl)
     {
+        std::cerr << "curl_easy_init fail!" << std::endl;
         return false;
     }
 
@@ -59,14 +62,10 @@ bool HttpRequest::request(const std::string &url,
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_WRITEDATA, (void *)(&_resp))
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, write_callback)
             || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTDATA, (void *)(&_linger))
-            || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback))
+            || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_SOCKOPTFUNCTION, sockopt_callback)
+            || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_URL, url.c_str()))
     {
-        return false;
-    }
-
-    // request
-    if(CURLE_OK != curl_easy_setopt(_curl, CURLOPT_URL, url.c_str()))
-    {
+        std::cerr << "curl_easy_setopt fail!" << std::endl;
         return false;
     }
 
@@ -74,6 +73,7 @@ bool HttpRequest::request(const std::string &url,
     {
         if(CURLE_OK != curl_easy_setopt(_curl, CURLOPT_HTTPGET, 1))
         {
+            std::cerr << "set get option fail!" << std::endl;
             return false;
         }
     }
@@ -82,11 +82,13 @@ bool HttpRequest::request(const std::string &url,
         if(CURLE_OK != curl_easy_setopt(_curl, CURLOPT_POST, 1)
                 || CURLE_OK != curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, data.c_str()))
         {
+            std::cerr << "set post option fail!" << std::endl;
             return false;
         }
     }
     else  // invalid request type
     {
+        std::cerr << "invalie request type!" << std::endl;
         return false;
     }
 
@@ -95,6 +97,7 @@ bool HttpRequest::request(const std::string &url,
             || CURLE_OK != curl_easy_getinfo(_curl, CURLINFO_RESPONSE_CODE, &retcode)
             || 200 != retcode)
     {
+        std::cerr << "get response fail!" << std::endl;
         return false;
     }
     return true;
@@ -119,6 +122,7 @@ size_t HttpRequest::write_callback(char *ptr,
     HttpWriteData *p_resp = (HttpWriteData*)userdata;
     if(NULL == p_resp || p_resp->length + bytes_n > _S_HTTP_MAX_RESPONSE_BYTES)
     {
+        std::cerr << "too big response!" << std::endl;
         p_resp->error = 1;
         return 0;
     }
